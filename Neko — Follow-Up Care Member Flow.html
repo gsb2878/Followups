@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neko — Follow-Up Care Member Flow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #1A2744;
+    --navy-mid: #243259;
+    --teal: #1B7A6E;
+    --teal-light: #E8F5F3;
+    --amber: #C87C2A;
+    --amber-light: #FEF3E2;
+    --red: #B94040;
+    --red-light: #FDEAEA;
+    --green: #2E7A4A;
+    --green-light: #E8F5ED;
+    --grey: #F4F5F7;
+    --border: #DDE1E9;
+    --text: #1A2744;
+    --muted: #6B7595;
+    --white: #FFFFFF;
+    --connector: #B8BDD0;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #F7F8FA;
+    color: var(--text);
+    padding: 48px 32px 80px;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .header {
+    margin-bottom: 48px;
+  }
+
+  .label-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .title {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-weight: 300;
+    max-width: 680px;
+    line-height: 1.6;
+  }
+
+  /* ── FLOW LAYOUT ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  /* main vertical spine */
+  .flow::before {
+    content: '';
+    position: absolute;
+    left: 32px;
+    top: 40px;
+    bottom: 40px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--navy) 0%, var(--border) 60%);
+    z-index: 0;
+  }
+
+  /* ── ROW ── */
+  .row {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .row + .row {
+    margin-top: 0;
+  }
+
+  /* ── STEP CIRCLE ── */
+  .step-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    position: relative;
+    z-index: 2;
+  }
+
+  .circle-navy { background: var(--navy); color: var(--white); }
+  .circle-teal { background: var(--teal); color: var(--white); }
+  .circle-amber { background: var(--amber); color: var(--white); }
+  .circle-green { background: var(--green); color: var(--white); }
+
+  /* ── CONNECTOR ARROWS ── */
+  .connector {
+    display: flex;
+    align-items: center;
+    padding: 0 0 0 20px;
+    height: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .connector-line {
+    width: 2px;
+    height: 32px;
+    background: var(--connector);
+    margin-left: 31px;
+  }
+
+  .connector-arrow {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid var(--connector);
+    margin-left: 26px;
+    margin-top: -2px;
+  }
+
+  .connector-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 64px;
+    flex-shrink: 0;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 22px;
+    flex: 1;
+    margin-top: 6px;
+    margin-bottom: 6px;
+  }
+
+  .card-navy {
+    border-color: var(--border);
+    background: var(--white);
+    color: var(--text);
+  }
+
+  .card-navy .card-title { color: var(--navy); }
+  .card-navy .card-body { color: var(--muted); }
+  .card-navy .pill-white { background: var(--grey); color: var(--muted); border: 1px solid var(--border); }
+  .pill-white { background: var(--grey); color: var(--muted); border: 1px solid var(--border); }
+
+  .card-teal { border-color: #A8D5CE; background: var(--teal-light); }
+  .card-amber { border-color: #F0C58A; background: var(--amber-light); }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+
+  .card-navy .card-title { color: var(--navy); }
+  .card-teal .card-title { color: var(--teal); }
+  .card-amber .card-title { color: var(--amber); }
+
+  .card-body {
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: 300;
+    color: var(--muted);
+  }
+
+  .card-navy .card-body { color: var(--muted); }
+  .card-teal .card-body { color: #3D7A73; }
+  .card-amber .card-body { color: #7A5020; }
+
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 8px;
+    margin-right: 4px;
+  }
+
+  .pill-white { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.2); }
+  .pill-teal { background: #C2E8E3; color: var(--teal); }
+  .pill-grey { background: var(--grey); color: var(--muted); border: 1px solid var(--border); }
+
+  /* ── SPLIT (branch) ── */
+  .split-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-left: 20px;
+    margin-bottom: 8px;
+    margin-top: 4px;
+  }
+
+  .branch-row {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    margin-top: 6px;
+    margin-bottom: 6px;
+  }
+
+  .branch-card {
+    flex: 1;
+    border-radius: 12px;
+    padding: 16px 18px;
+    border: 1.5px solid;
+  }
+
+  .branch-no {
+    border-color: var(--border);
+    background: var(--grey);
+  }
+
+  .branch-yes {
+    border-color: #F0C58A;
+    background: var(--amber-light);
+  }
+
+  .branch-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .branch-no .branch-title { color: var(--muted); }
+  .branch-yes .branch-title { color: var(--amber); }
+
+  .branch-body {
+    font-size: 12px;
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  .branch-no .branch-body { color: var(--muted); }
+  .branch-yes .branch-body { color: #7A5020; }
+
+  .branch-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+
+  .tag-no { background: var(--grey); color: var(--muted); border: 1px solid var(--border); }
+  .tag-yes { background: #F0C58A; color: var(--amber); }
+
+  /* ── OPTIONS BLOCK ── */
+  .options-row {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    margin-top: 6px;
+    margin-bottom: 6px;
+  }
+
+  .option-card {
+    flex: 1;
+    border-radius: 12px;
+    padding: 16px 16px;
+    border: 1.5px solid;
+    position: relative;
+  }
+
+  .opt-cash { border-color: var(--border); background: var(--white); }
+  .opt-ins  { border-color: #A8D5CE; background: var(--teal-light); }
+  .opt-ref  { border-color: var(--border); background: var(--grey); }
+
+  .opt-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .opt-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .opt-ins .opt-title { color: var(--teal); }
+
+  .opt-price {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    margin: 8px 0 4px;
+    line-height: 1.4;
+  }
+
+  .opt-ins .opt-price { color: var(--teal); }
+
+  .opt-body {
+    font-size: 11.5px;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  .opt-ins .opt-body { color: #3D7A73; }
+
+  .opt-recommended {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--teal);
+    color: var(--white);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  /* ── OUTCOME CARDS ── */
+  .outcome-row {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    margin-top: 6px;
+    margin-bottom: 6px;
+  }
+
+  .outcome-card {
+    flex: 1;
+    border-radius: 12px;
+    padding: 16px 18px;
+    border: 1.5px solid;
+  }
+
+  .out-visit { border-color: #C4C0E8; background: #F0EFFA; }
+  .out-bridge { border-color: #C4C0E8; background: #F0EFFA; }
+  .out-revenue { border-color: #C4C0E8; background: #F0EFFA; }
+  .out-oop { border-color: #C4C0E8; background: #F0EFFA; }
+
+  .out-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .out-visit .out-title,
+  .out-bridge .out-title,
+  .out-revenue .out-title,
+  .out-oop .out-title { color: #4A3F9F; }
+
+  .out-body {
+    font-size: 12px;
+    font-weight: 300;
+    line-height: 1.5;
+    color: #4A4680;
+  }
+
+  .out-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+
+  .tag-step,
+  .tag-bridge,
+  .tag-revenue,
+  .tag-oop { background: #DCD9F5; color: #4A3F9F; }
+
+  /* ── FOOTNOTE ── */
+  .footnote {
+    margin-top: 40px;
+    padding: 16px 20px;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .footnote strong { color: var(--text); font-weight: 500; }
+
+  /* icon SVGs inline */
+  .icon { width: 22px; height: 22px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="label-tag">Neko Health — US Launch 2026</div>
+    <div class="title">Follow-Up Care Reimbursement — Member Flow</div>
+    <div class="subtitle">Follow-up care billing generates additional revenue on every clinically indicated visit, while giving members the ability to use their insurance exactly where they would expect it to apply — reinforcing Neko as a medical service, not a wellness product.</div>
+  </div>
+
+  <div class="flow">
+
+    <!-- STEP 1: Sign Up -->
+    <div class="row">
+      <div class="step-circle circle-navy">01</div>
+      <div class="card card-navy">
+        <div class="card-title">Sign-Up &amp; Intake Form</div>
+        <div class="card-body">During the intake form, members are invited to add their insurance details. We explain that insurance is not used for the scan itself, but may be relevant if a follow-up visit is recommended. Providing insurance details at this stage is optional — members can choose to skip it or add details later.</div>
+        <span class="pill pill-white">Optional at sign-up</span>
+        <span class="pill pill-white">Can be added later</span>
+      </div>
+    </div>
+
+    <div class="connector-block">
+      <div class="connector-line"></div>
+      <div class="connector-arrow"></div>
+    </div>
+
+    <!-- STEP 2: Scan -->
+    <div class="row">
+      <div class="step-circle circle-navy">02</div>
+      <div class="card">
+        <div class="card-title">Neko Scan &amp; Consultation</div>
+        <div class="card-body">Full-body scan and physician consultation. The scan is $499 for all members — no insurance is involved at this stage. Approximately 30% of scans generate a finding that warrants a follow-up visit (BP 10%, EKG 9%, dermoscopy 8%, echo 6%, ABPI 1%).</div>
+        <span class="pill pill-grey">$499 for all members</span>
+        <span class="pill pill-grey">~30% proceed to follow-up</span>
+      </div>
+    </div>
+
+    <div class="connector-block">
+      <div class="connector-line"></div>
+      <div class="connector-arrow"></div>
+    </div>
+
+    <!-- STEP 3: Branch -->
+    <div class="row">
+      <div class="step-circle circle-navy" style="margin-top:6px;">03</div>
+      <div style="flex:1; margin-top:6px; margin-bottom:6px;">
+        <div class="split-label">Findings review</div>
+        <div class="branch-row">
+          <div class="branch-card branch-no">
+            <div class="branch-tag tag-no">No follow-up needed</div>
+            <div class="branch-title">All clear</div>
+            <div class="branch-body">No clinical findings requiring further attention. Insurance is never activated. Member receives their results and report.</div>
+          </div>
+          <div class="branch-card branch-yes">
+            <div class="branch-tag tag-yes">Follow-up recommended</div>
+            <div class="branch-title">Finding identified</div>
+            <div class="branch-body">Physician identifies a finding requiring follow-up (e.g. elevated BP, EKG abnormality, skin lesion, echo finding). Member receives a message: <em>"We recommend a follow-up visit for [X]. Here are your options."</em></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector-block">
+      <div class="connector-line"></div>
+      <div class="connector-arrow"></div>
+    </div>
+
+    <!-- STEP 4: Options -->
+    <div class="row">
+      <div class="step-circle circle-amber">04</div>
+      <div style="flex:1; margin-top:6px; margin-bottom:6px;">
+        <div class="split-label">Member selects follow-up option</div>
+        <div class="options-row">
+
+          <div class="option-card opt-cash">
+            <div class="opt-num">Option A</div>
+            <div class="opt-title">Cash pay</div>
+            <div class="opt-price">$99</div>
+            <div class="opt-body">Flat fee. No insurance involved. Simple and predictable.</div>
+          </div>
+
+          <div class="option-card opt-ins">
+            <div class="opt-num">Option B</div>
+            <div class="opt-title">Use insurance</div>
+            <div class="opt-price">Your estimated cost: <strong>$25</strong></div>
+            <div class="opt-body">Based on our eligibility check with your plan. Neko bills your insurer for the E/M visit and indicated procedures.</div>
+          </div>
+
+          <div class="option-card opt-ref">
+            <div class="opt-num">Option C</div>
+            <div class="opt-title">Refer elsewhere</div>
+            <div class="opt-price">—</div>
+            <div class="opt-body">Member prefers to follow up with their own provider. Neko provides a full clinical summary and referral letter.</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="connector-block">
+      <div class="connector-line"></div>
+      <div class="connector-arrow"></div>
+    </div>
+
+    <!-- STEP 5a: Follow-up visit + Bridge bills -->
+    <div class="row">
+      <div class="step-circle circle-teal">05</div>
+      <div style="flex:1; margin-top:6px; margin-bottom:6px;">
+        <div class="split-label">For members choosing Option B — insurance</div>
+        <div class="outcome-row">
+
+          <div class="outcome-card out-visit">
+            <div class="out-tag tag-step">Visit</div>
+            <div class="out-title">Follow-Up at Neko</div>
+            <div class="out-body">Member attends follow-up at Neko. Physician conducts the indicated procedure (e.g. 12-lead EKG, echo, dermoscopy, BP review). No payment is made to Neko at the point of visit.</div>
+          </div>
+
+          <div class="outcome-card out-bridge">
+            <div class="out-tag tag-bridge">Billing</div>
+            <div class="out-title">Bridge Bills Insurer &amp; Pays Out Neko</div>
+            <div class="out-body">Bridge submits the E/M visit and applicable CPT procedure codes to the member's insurer, handles claims and revenue cycle management, and passes reimbursement to Neko. Average <strong>~$111 per visit</strong> (blended 50/50 MD/NP model, subsequent visit rates).</div>
+          </div>
+
+
+
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end flow -->
+
+</div>
+</body>
+</html>
